@@ -1,8 +1,9 @@
 {
   "name": "dyna-throttle",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Module for dynamically throttling Function and Promise execution based on latency",
   "main": "index.js",
+  "repository": "KAndersonUS/dyna-throttle",
   "directories": {
     "test": "test"
   },
