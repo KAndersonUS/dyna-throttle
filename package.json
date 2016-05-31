@@ -15,5 +15,9 @@
     "promise"
   ],
   "author": "Kyle Anderson <mail@kyleanderson.us>",
-  "license": "ISC"
+  "license": "ISC",
+  "engines" : {
+    "node" : ">=4.0.0",
+    "iojs" : ">=1.4.1"
+  }
 }
