@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node node_modules/mocha/bin/_mocha --timeout 0 --ui bdd ./test/*.spec.js"
   },
   "keywords": [
     "throttle",
@@ -17,8 +17,13 @@
   ],
   "author": "Kyle Anderson <mail@kyleanderson.us>",
   "license": "ISC",
-  "engines" : {
-    "node" : ">=4.0.0",
-    "iojs" : ">=1.4.1"
+  "engines": {
+    "node": ">=4.0.0",
+    "iojs": ">=1.4.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "express": "^4.15.2",
+    "mocha": "^3.2.0"
   }
 }
