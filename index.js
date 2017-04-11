@@ -16,28 +16,45 @@ function DynaThrottle () {
         const promiseFunc = promise.bind({});
         var namespace = promiseFunc.name.substring(6);
         if (!stacks.hasOwnProperty(namespace)) {
-            stacks[namespace] = {
-                timer : new ResponseTimer(),
-                last : new Date(),
-                lastId : null,
-                factor : 10,
-                stack : []
-            }
+            // stacks[namespace] = {
+            //     timer : new ResponseTimer(),
+            //     last : new Date(),
+            //     lastId : null,
+            //     factor : 10,
+            //     stack : []
+            // }
         }
-        var id = newId();
-        stacks[namespace].stack.push(id);
-        emitter.on(id, function () {
-            const key = stacks[namespace].timer.start();
-            promiseFunc(data).then(function (data) {
-                stacks[namespace].timer.stop(key);
-                stacks[namespace].last = new Date();
-                stacks[namespace].stack.shift();
-                onFulfill(data);
-            }).catch(function (err) {
-                stacks[namespace].timer.stop(key);
-                stacks[namespace].last = new Date();
-                stacks[namespace].stack.shift();
-                onReject(err);
+        createNamespaceIfNotExists(namespace).then(() => {
+            var id = newId();
+            stacks[namespace].stack.push(id);
+
+            emitter.on(id, function () {
+                const key = stacks[namespace].timer.start();
+
+                // remove timed out promises when the timer emits a timeout event
+                // This pattern is the reverse of typical events - timer id is the event name
+                stacks[namespace].timer.on(key, function (event) {
+                    switch (event) {
+                        case 'timeout':
+                            complete();
+                            onReject(new Error(`Promise timed out after ${stacks[namespace].timer.getTimeout()}ms (namespace: ${namespace})`))
+                    }
+                });
+
+                // execute the promise function when it's time to execute
+                promiseFunc(data).then(function (data) {
+                    complete();
+                    onFulfill(data);
+                }).catch(function (err) {
+                    complete();
+                    onReject(err);
+                });
+
+                function complete () {
+                    stacks[namespace].timer.stop(key);
+                    stacks[namespace].last = new Date();
+                    stacks[namespace].stack.shift();
+                }
             });
         });
         return null;
