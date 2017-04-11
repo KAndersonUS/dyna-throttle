@@ -41,17 +41,18 @@ server.get('/silence', (req, res, next) => {
 module.exports = {
     start : function () {
         return new Promise((fulfill, reject) => {
-            server.listen(listenPort, (err) => {
-                if (err && err.message.match(/EADDRINUSE/gi)) {
-                    fulfill();
-                    return;
-                } else if (err) {
-                    reject(err);
-                    return;
-                }
+            let httpServer = server.listen(listenPort, (err) => {
                 console.log(`Test server listening on port ${listenPort}`);
                 fulfill();
+            });
+            httpServer.on('error', (err) => {
+                if (err.message.match(/.*EADDRINUSE.*/gi)) {
+                    fulfill();
+                } else if (err) {
+                    reject(err);
+                }
             })
         });
-    }
+    },
+    port : listenPort
 };
