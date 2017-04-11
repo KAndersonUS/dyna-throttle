@@ -5,14 +5,14 @@ const http = require('http');
 const server = require('./server');
 const throttle = require('./../index.js');
 
-const port = 8888;
+const port = server.port;
 const startFactor = 1;
 const endFactor = 10;
 const startDesiredDelay = 25;
 const endDesiredDelay = 300;
 
 beforeEach(() => {
-    server.start()
+    return server.start()
 });
 
 function generateTest (desiredDelay, factor) {
