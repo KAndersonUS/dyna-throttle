@@ -8,24 +8,17 @@ module.exports = exports = new DynaThrottle();
 
 function DynaThrottle () {
     const execTimer = new ResponseTimer();
-    var stacks = {};
-
-    var emitter = new EventEmitter();
+    const emitter = new EventEmitter();
+    let stacks = {};
 
     function main (promise, data, onFulfill, onReject) {
-        const promiseFunc = promise.bind({});
-        var namespace = promiseFunc.name.substring(6);
-        if (!stacks.hasOwnProperty(namespace)) {
-            // stacks[namespace] = {
-            //     timer : new ResponseTimer(),
-            //     last : new Date(),
-            //     lastId : null,
-            //     factor : 10,
-            //     stack : []
-            // }
+        if (typeof promise !== 'function') {
+            throw new Error('dyna-throttle: first argument must be a function that returns a Promise');
         }
+        const promiseFunc = promise.bind({});
+        let namespace = promise.name;
         createNamespaceIfNotExists(namespace).then(() => {
-            var id = newId();
+            let id = newId();
             stacks[namespace].stack.push(id);
 
             emitter.on(id, function () {
@@ -109,7 +102,7 @@ function DynaThrottle () {
     };
 
     function createNamespaceIfNotExists (namespace) {
-        var ns = '';
+        let ns = '';
         switch (typeof namespace) {
             case 'function':
                 ns = namespace.name;
@@ -140,19 +133,19 @@ function DynaThrottle () {
     }
 
     (function run () {
-        var timer = execTimer.start();
+        let timer = execTimer.start();
         for (let prop in stacks) {
             if (stacks.hasOwnProperty(prop)) {
-                var t = stacks[prop].timer;
-                var last = stacks[prop].last.getTime();
-                var factor = stacks[prop].factor;
-                var avg = t.getAverage();
+                let t = stacks[prop].timer;
+                let last = stacks[prop].last.getTime();
+                let factor = stacks[prop].factor;
+                let avg = t.getAverage();
 
                 if (avg * factor > Date.now() - last) {
                     continue;
                 }
 
-                var id = stacks[prop].stack[0];
+                let id = stacks[prop].stack[0];
                 if (!id) {
                     continue;
                 }
@@ -175,7 +168,7 @@ function DynaThrottle () {
 }
 
 function newId () {
-    var hash = new crypto.createHash('md5');
+    let hash = new crypto.createHash('md5');
     hash.update(Math.random().toString() + Date.now());
     return hash.digest('hex');
 }
